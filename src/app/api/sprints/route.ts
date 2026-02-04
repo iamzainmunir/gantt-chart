@@ -3,13 +3,23 @@ import { prisma } from "@/lib/db";
 
 export async function GET() {
   try {
-    const sprints = await prisma.sprint.findMany({
+    let sprints = await prisma.sprint.findMany({
       orderBy: { startDate: "desc" },
       include: {
         workspace: { select: { id: true, name: true } },
         _count: { select: { tasks: true } },
       },
     });
+    const now = new Date();
+    for (const s of sprints) {
+      if (new Date(s.endDate) < now && s.state.toLowerCase() === "active") {
+        await prisma.sprint.update({
+          where: { id: s.id },
+          data: { state: "closed" },
+        });
+        (s as { state: string }).state = "closed";
+      }
+    }
     return NextResponse.json(sprints);
   } catch (e) {
     console.error(e);

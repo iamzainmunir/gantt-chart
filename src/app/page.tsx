@@ -5,13 +5,13 @@ export default function HomePage() {
     <main className="min-h-[calc(100vh-3.5rem)]">
       <section className="mx-auto max-w-3xl px-4 py-16 sm:px-6 sm:py-24">
         <p className="text-sm font-medium uppercase tracking-wider text-[var(--accent)]">
-          Sprint intelligence
+          Sprint planning
         </p>
         <h1 className="mt-3 text-3xl font-bold tracking-tight text-[var(--text)] sm:text-4xl">
           Know what will fail — and what to do next
         </h1>
         <p className="mt-4 max-w-xl text-lg text-[var(--text-secondary)]">
-          SprintMind turns sprint chaos into predictable execution with Gantt
+          SimpliEd Sprint Planner turns sprint chaos into predictable execution with Gantt
           timelines, spillover detection, and AI-assisted planning.
         </p>
         <div className="mt-10 flex flex-wrap gap-4">

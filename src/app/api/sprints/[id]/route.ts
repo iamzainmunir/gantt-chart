@@ -46,6 +46,19 @@ export async function GET(
     if (!sprint) {
       return NextResponse.json({ error: "Sprint not found" }, { status: 404 });
     }
+    const now = new Date();
+    if (new Date(sprint.endDate) < now && sprint.state.toLowerCase() === "active") {
+      const updated = await prisma.sprint.update({
+        where: { id },
+        data: { state: "closed" },
+        include: {
+          workspace: { select: { id: true, name: true } },
+          tasks: { orderBy: { order: "asc" } },
+          spillovers: true,
+        },
+      });
+      Object.assign(sprint, updated);
+    }
     await ensureSpilloverRecords(prisma, id);
     const [health, spillovers, siblingSprints] = await Promise.all([
       computeSprintHealth(prisma, id),

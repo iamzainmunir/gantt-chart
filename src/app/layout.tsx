@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "SprintMind — AI-driven sprint intelligence",
+  title: "SimpliEd Sprint Planner",
   description:
     "Track, understand, and plan sprints with Gantt timelines and spillover handling.",
 };
@@ -28,7 +28,7 @@ export default function RootLayout({
                 href="/"
                 className="text-lg font-semibold tracking-tight text-[var(--text)] transition opacity-90 hover:opacity-100"
               >
-                SprintMind
+                SimpliEd Sprint Planner
               </a>
               <nav className="flex items-center gap-1">
                 <a

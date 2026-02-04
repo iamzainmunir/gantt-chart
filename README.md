@@ -1,12 +1,12 @@
-# SprintMind (Gantt Chart)
+# SimpliEd Sprint Planner
 
-**SprintMind** is an AI-driven sprint intelligence app for planning and tracking sprints with an interactive Gantt chart, spillover detection, and optional local AI analysis via Ollama.
+**SimpliEd Sprint Planner** is an AI-driven sprint planning app for planning and tracking sprints with an interactive Gantt chart, spillover detection, and optional local AI analysis via Ollama.
 
 ---
 
 ## Summary
 
-SprintMind helps teams manage sprints with:
+SimpliEd Sprint Planner helps teams manage sprints with:
 
 - **Interactive Gantt timeline** — Drag tasks to reschedule, resize bars to change duration, double-click to edit task names.
 - **Workspaces & sprints** — Create workspaces, start new sprints with configurable length (1 or 2 weeks), and set timeline by start date only (end date is auto-calculated).

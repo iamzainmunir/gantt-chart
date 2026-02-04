@@ -1,107 +1,102 @@
 import { prisma } from "../src/lib/db";
 
 async function main() {
-  const existing = await prisma.workspace.findFirst({
-    where: { name: "SprintMind Demo" },
-  });
-  if (existing) {
-    console.log("Seed already applied (SprintMind Demo workspace exists).");
-    return;
-  }
+  console.log("Cleaning existing data...");
+  await prisma.spillover.deleteMany();
+  await prisma.aISprintInsight.deleteMany();
+  await prisma.sprintMetrics.deleteMany();
+  await prisma.task.deleteMany();
+  await prisma.sprint.deleteMany();
+  await prisma.workspace.deleteMany();
 
   const workspace = await prisma.workspace.create({
-    data: { name: "SprintMind Demo" },
+    data: { name: "SimpliEd Sprint Planner Demo", sprintLengthDays: 14 },
   });
 
-  const now = new Date();
-
-  // --- Closed sprint with spillover tasks (ended in the past) ---
-  const closedSprintStart = new Date(now);
-  closedSprintStart.setDate(closedSprintStart.getDate() - 28);
-  const closedSprintEnd = new Date(now);
-  closedSprintEnd.setDate(closedSprintEnd.getDate() - 14); // ended 2 weeks ago
-
-  const closedSprint = await prisma.sprint.create({
-    data: {
-      name: "Sprint 0 – January",
-      state: "closed",
-      startDate: closedSprintStart,
-      endDate: closedSprintEnd,
-      workspaceId: workspace.id,
+  // 3 sprints of 2 weeks each, starting Jan 7, 2026
+  const sprintDefs = [
+    {
+      name: "Q1 Sprint 1: Discovery & Foundation",
+      startDate: new Date("2026-01-07"),
+      endDate: new Date("2026-01-20"),
     },
-  });
-
-  const closedSprintTaskDefs = [
-    { start: 0, end: 3, summary: "Migrate legacy auth to OAuth2", status: "Done" },
-    { start: 2, end: 6, summary: "Replace deprecated payment SDK", status: "In Progress" }, // spillover
-    { start: 4, end: 10, summary: "Audit and fix security headers", status: "To Do" }, // spillover
+    {
+      name: "Q1 Sprint 2: Core Features",
+      startDate: new Date("2026-01-21"),
+      endDate: new Date("2026-02-03"),
+    },
+    {
+      name: "Q1 Sprint 3: Polish & Launch",
+      startDate: new Date("2026-02-04"),
+      endDate: new Date("2026-02-17"),
+    },
   ];
 
-  for (let i = 0; i < closedSprintTaskDefs.length; i++) {
-    const d = closedSprintTaskDefs[i];
-    const taskStart = new Date(closedSprintStart);
-    taskStart.setDate(taskStart.getDate() + d.start);
-    const taskEnd = new Date(closedSprintStart);
-    taskEnd.setDate(taskEnd.getDate() + d.end);
-    await prisma.task.create({
+  for (const def of sprintDefs) {
+    const sprint = await prisma.sprint.create({
       data: {
-        summary: d.summary,
-        estimate: (d.end - d.start) * 2,
-        status: d.status,
-        order: i + 1,
-        startDate: taskStart,
-        endDate: taskEnd,
-        sprintId: closedSprint.id,
+        name: def.name,
+        state: "active",
+        startDate: def.startDate,
+        endDate: def.endDate,
+        workspaceId: workspace.id,
       },
     });
+
+    const taskDefs = getTasksForSprint(def.name);
+    for (let i = 0; i < taskDefs.length; i++) {
+      const t = taskDefs[i];
+      const taskStart = new Date(def.startDate);
+      taskStart.setDate(taskStart.getDate() + t.start);
+      const taskEnd = new Date(def.startDate);
+      taskEnd.setDate(taskEnd.getDate() + t.end);
+      await prisma.task.create({
+        data: {
+          summary: t.summary,
+          status: t.status,
+          order: i + 1,
+          startDate: taskStart,
+          endDate: taskEnd,
+          estimate: (t.end - t.start) * 2,
+          sprintId: sprint.id,
+        },
+      });
+    }
   }
 
-  // --- Active sprint ---
-  const startDate = new Date(now);
-  startDate.setDate(startDate.getDate() - 7);
-  const endDate = new Date(now);
-  endDate.setDate(endDate.getDate() + 7);
+  console.log("Seed complete: 1 workspace, 3 sprints (2 weeks each from Jan 7 2026), with realistic tasks.");
+}
 
-  const sprint = await prisma.sprint.create({
-    data: {
-      name: "Sprint 1 – February",
-      state: "active",
-      startDate,
-      endDate,
-      workspaceId: workspace.id,
-    },
-  });
-
-  const taskDefs = [
-    { start: 0, end: 2, summary: "Implement user authentication flow", status: "In Progress" },
-    { start: 1, end: 4, summary: "Setup CI/CD pipeline for staging", status: "In Progress" },
-    { start: 3, end: 6, summary: "Design and implement dashboard API", status: "In Progress" },
-    { start: 5, end: 10, summary: "Add export to PDF for reports", status: "To Do" },
-    { start: 7, end: 12, summary: "Refactor notification service", status: "To Do" },
-    { start: 2, end: 5, summary: "Write E2E tests for checkout flow", status: "To Do" },
-    { start: 4, end: 8, summary: "Fix accessibility issues in sidebar", status: "To Do" },
+function getTasksForSprint(sprintName: string): Array<{ start: number; end: number; summary: string; status: string }> {
+  if (sprintName.includes("Sprint 1")) {
+    return [
+      { start: 0, end: 3, summary: "User research and persona definition", status: "Done" },
+      { start: 1, end: 5, summary: "Set up design system and component library", status: "Done" },
+      { start: 3, end: 8, summary: "Implement SSO and role-based access control", status: "In Progress" },
+      { start: 5, end: 10, summary: "Database schema design and migrations", status: "In Progress" },
+      { start: 6, end: 12, summary: "API contract design and OpenAPI spec", status: "To Do" },
+      { start: 8, end: 14, summary: "CI pipeline and staging environment setup", status: "To Do" },
+    ];
+  }
+  if (sprintName.includes("Sprint 2")) {
+    return [
+      { start: 0, end: 4, summary: "REST API for projects and tasks", status: "In Progress" },
+      { start: 2, end: 6, summary: "Dashboard and analytics endpoints", status: "In Progress" },
+      { start: 4, end: 9, summary: "Frontend: project list and detail views", status: "In Progress" },
+      { start: 5, end: 11, summary: "Real-time notifications with WebSockets", status: "To Do" },
+      { start: 7, end: 12, summary: "Search and filter across entities", status: "To Do" },
+      { start: 9, end: 14, summary: "Unit and integration test coverage", status: "To Do" },
+    ];
+  }
+  // Sprint 3
+  return [
+    { start: 0, end: 3, summary: "Performance audit and query optimization", status: "To Do" },
+    { start: 1, end: 5, summary: "Accessibility review and WCAG fixes", status: "To Do" },
+    { start: 3, end: 8, summary: "Documentation and runbooks", status: "To Do" },
+    { start: 4, end: 10, summary: "Security scan and dependency updates", status: "To Do" },
+    { start: 6, end: 12, summary: "Launch checklist and go-live runbook", status: "To Do" },
+    { start: 8, end: 14, summary: "Post-launch monitoring and alerting", status: "To Do" },
   ];
-
-  for (let i = 0; i < taskDefs.length; i++) {
-    const d = taskDefs[i];
-    const taskStart = new Date(startDate);
-    taskStart.setDate(taskStart.getDate() + d.start);
-    const taskEnd = new Date(startDate);
-    taskEnd.setDate(taskEnd.getDate() + d.end);
-    await prisma.task.create({
-      data: {
-        summary: d.summary,
-        estimate: (d.end - d.start) * 2,
-        status: d.status,
-        order: i + 1,
-        startDate: taskStart,
-        endDate: taskEnd,
-        sprintId: sprint.id,
-      },
-    });
-  }
-
-  console.log("Seed complete: workspace, 2 sprints (1 closed with 2 spillover tasks, 1 active), 10 tasks.");
 }
 
 main()
