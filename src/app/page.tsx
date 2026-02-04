@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { DemoDataButton } from "@/components/DemoDataButton";
 
 export default function HomePage() {
   return (
@@ -11,10 +12,10 @@ export default function HomePage() {
           Know what will fail — and what to do next
         </h1>
         <p className="mt-4 max-w-xl text-lg text-[var(--text-secondary)]">
-          SimpliEd Sprint Planner turns sprint chaos into predictable execution with Gantt
+          Sprint Planner turns sprint chaos into predictable execution with Gantt
           timelines, spillover detection, and AI-assisted planning.
         </p>
-        <div className="mt-10 flex flex-wrap gap-4">
+        <div className="mt-10 flex flex-wrap items-center gap-4">
           <Link href="/sprints" className="btn-primary">
             View Sprints
             <span aria-hidden>→</span>
@@ -22,6 +23,7 @@ export default function HomePage() {
           <Link href="/sprints" className="btn-ghost">
             Open dashboard
           </Link>
+          <DemoDataButton />
         </div>
         <ul className="mt-16 grid gap-4 text-sm sm:grid-cols-3">
           <li className="flex gap-3 rounded-xl border border-[var(--border)] bg-[var(--bg-elevated)] p-4">

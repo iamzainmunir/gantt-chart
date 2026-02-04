@@ -22,6 +22,8 @@ export type SprintGanttSectionProps = {
   }>;
   spilloverTaskIds: string[];
   otherSprints: Array<{ id: string; name: string }>;
+  /** When true, timeline is read-only (no edit, add task, or move) */
+  readOnly?: boolean;
 };
 
 export function SprintGanttSection({
@@ -31,6 +33,7 @@ export function SprintGanttSection({
   tasks,
   spilloverTaskIds,
   otherSprints,
+  readOnly,
 }: SprintGanttSectionProps) {
   const router = useRouter();
   const [addModalOpen, setAddModalOpen] = useState(false);
@@ -108,35 +111,45 @@ export function SprintGanttSection({
         sprintEnd={sprintEnd}
         tasks={ganttTasks}
         width={900}
-        editable
+        editable={!readOnly}
         spilloverTaskIds={spilloverTaskIds}
-        onTaskSummaryChange={async (taskId, summary) => {
-          await fetch(`/api/tasks/${taskId}`, {
-            method: "PATCH",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ summary }),
-          });
-          refresh();
-        }}
-        addTaskButton={
-          <button
-            type="button"
-            onClick={() => setAddModalOpen(true)}
-            className="rounded bg-[var(--accent)] px-2 py-1 text-xs font-medium text-white hover:bg-[var(--accent-hover)]"
-          >
-            Add task
-          </button>
+        onTaskSummaryChange={
+          readOnly
+            ? undefined
+            : async (taskId, summary) => {
+                await fetch(`/api/tasks/${taskId}`, {
+                  method: "PATCH",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({ summary }),
+                });
+                refresh();
+              }
         }
-        renderTaskActions={(task) => (
-          <TaskPanelActions
-            task={task}
-            sprintId={sprintId}
-            otherSprints={otherSprints}
-            onRefresh={refresh}
-          />
-        )}
+        addTaskButton={
+          readOnly ? undefined : (
+            <button
+              type="button"
+              onClick={() => setAddModalOpen(true)}
+              className="rounded bg-[var(--accent)] px-2 py-1 text-xs font-medium text-white hover:bg-[var(--accent-hover)]"
+            >
+              Add task
+            </button>
+          )
+        }
+        renderTaskActions={
+          readOnly
+            ? undefined
+            : (task) => (
+                <TaskPanelActions
+                  task={task}
+                  sprintId={sprintId}
+                  otherSprints={otherSprints}
+                  onRefresh={refresh}
+                />
+              )
+        }
       />
-      {addModalOpen && (
+      {!readOnly && addModalOpen && (
         <AddTaskModal
           sprintId={sprintId}
           sprintStart={sprintStart}

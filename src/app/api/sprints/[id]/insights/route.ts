@@ -6,6 +6,9 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params;
+  if (!prisma) {
+    return NextResponse.json({ insight: null });
+  }
   const latest = await prisma.aISprintInsight.findFirst({
     where: { sprintId: id },
     orderBy: { createdAt: "desc" },

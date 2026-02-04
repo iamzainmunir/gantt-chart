@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { SprintsListWithNew } from "../../components/sprint/SprintsListWithNew";
+import { SprintsPageClient } from "./SprintsPageClient";
 
 const base = process.env.VERCEL_URL
   ? `https://${process.env.VERCEL_URL}`
@@ -55,11 +56,48 @@ function formatState(state: string) {
   return state.charAt(0).toUpperCase() + state.slice(1).toLowerCase();
 }
 
-export default async function SprintsPage() {
-  const [sprints, workspaces] = await Promise.all([
-    getSprints(),
-    getWorkspaces(),
-  ]);
+export default async function SprintsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ demo?: string }>;
+}) {
+  const { demo } = await searchParams;
+  if (demo === "1") {
+    return <SprintsPageClient />;
+  }
+
+  let sprints: Awaited<ReturnType<typeof getSprints>>;
+  let workspaces: Awaited<ReturnType<typeof getWorkspaces>>;
+  try {
+    [sprints, workspaces] = await Promise.all([
+      getSprints(),
+      getWorkspaces(),
+    ]);
+  } catch {
+    return (
+      <main className="min-h-[calc(100vh-3.5rem)]">
+        <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6 sm:py-10">
+          <h1 className="text-2xl font-bold tracking-tight text-[var(--text)] sm:text-3xl">
+            Sprints
+          </h1>
+          <div className="card mt-6 rounded-xl border-dashed p-10 text-center">
+            <p className="text-[var(--text-secondary)]">
+              Unable to load sprints (database may be unavailable).
+            </p>
+            <p className="mt-2 text-sm text-[var(--text-muted)]">
+              Use demo data to explore the app without a database:
+            </p>
+            <Link
+              href="/"
+              className="btn-primary mt-4 inline-flex"
+            >
+              Go home and load demo data
+            </Link>
+          </div>
+        </div>
+      </main>
+    );
+  }
 
   return (
     <main className="min-h-[calc(100vh-3.5rem)]">

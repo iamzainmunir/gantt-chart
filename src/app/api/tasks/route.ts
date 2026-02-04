@@ -2,6 +2,12 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 
 export async function POST(request: NextRequest) {
+  if (!prisma) {
+    return NextResponse.json(
+      { error: "Database is disabled. Set USE_DATABASE=true to enable." },
+      { status: 503 }
+    );
+  }
   try {
     const body = await request.json();
     const {

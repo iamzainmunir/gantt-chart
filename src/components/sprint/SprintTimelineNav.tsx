@@ -13,6 +13,8 @@ type Props = {
   workspaceId: string;
   isClosed: boolean;
   workspaces: Workspace[];
+  /** When true, prev/next links include ?demo=1 and "Start next sprint" is hidden */
+  demoMode?: boolean;
 };
 
 export function SprintTimelineNav({
@@ -22,8 +24,10 @@ export function SprintTimelineNav({
   workspaceId,
   isClosed,
   workspaces,
+  demoMode,
 }: Props) {
   const [newSprintOpen, setNewSprintOpen] = useState(false);
+  const q = demoMode ? "?demo=1" : "";
   const nextStartDate = (() => {
     const end = new Date(sprintEndDate);
     end.setDate(end.getDate() + 1);
@@ -34,7 +38,7 @@ export function SprintTimelineNav({
     <div className="flex flex-wrap items-center gap-3">
       {prevSprintId && (
         <Link
-          href={`/sprints/${prevSprintId}`}
+          href={`/sprints/${prevSprintId}${q}`}
           className="btn-ghost inline-flex items-center gap-1 text-sm"
         >
           ← Previous sprint
@@ -42,13 +46,13 @@ export function SprintTimelineNav({
       )}
       {nextSprintId && (
         <Link
-          href={`/sprints/${nextSprintId}`}
+          href={`/sprints/${nextSprintId}${q}`}
           className="btn-ghost inline-flex items-center gap-1 text-sm"
         >
           Next sprint →
         </Link>
       )}
-      {isClosed && workspaces.length > 0 && (
+      {!demoMode && isClosed && workspaces.length > 0 && (
         <button
           type="button"
           onClick={() => setNewSprintOpen(true)}

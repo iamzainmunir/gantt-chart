@@ -1,7 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
+import { getDummySprints } from "@/lib/dummyData";
 
 export async function GET() {
+  if (!prisma) {
+    return NextResponse.json(getDummySprints());
+  }
   try {
     let sprints = await prisma.sprint.findMany({
       orderBy: { startDate: "desc" },
@@ -23,14 +27,17 @@ export async function GET() {
     return NextResponse.json(sprints);
   } catch (e) {
     console.error(e);
-    return NextResponse.json(
-      { error: "Failed to fetch sprints" },
-      { status: 500 }
-    );
+    return NextResponse.json(getDummySprints());
   }
 }
 
 export async function POST(request: NextRequest) {
+  if (!prisma) {
+    return NextResponse.json(
+      { error: "Database is disabled. Set USE_DATABASE=true to enable." },
+      { status: 503 }
+    );
+  }
   try {
     const body = await request.json();
     const { workspaceId, name, startDate, endDate, state } = body as {
@@ -82,13 +89,21 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    const newState = state ?? "active";
+    if (newState.toLowerCase() === "active") {
+      await prisma.sprint.updateMany({
+        where: { workspaceId },
+        data: { state: "closed" },
+      });
+    }
+
     const sprint = await prisma.sprint.create({
       data: {
         workspaceId,
         name: name.trim(),
         startDate: start,
         endDate: end,
-        state: state ?? "active",
+        state: newState,
       },
     });
     return NextResponse.json(sprint);

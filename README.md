@@ -1,12 +1,12 @@
-# SimpliEd Sprint Planner
+# Sprint Planner
 
-**SimpliEd Sprint Planner** is an AI-driven sprint planning app for planning and tracking sprints with an interactive Gantt chart, spillover detection, and optional local AI analysis via Ollama.
+**Sprint Planner** is an AI-driven sprint planning app for planning and tracking sprints with an interactive Gantt chart, spillover detection, and optional local AI analysis via Ollama.
 
 ---
 
 ## Summary
 
-SimpliEd Sprint Planner helps teams manage sprints with:
+Sprint Planner helps teams manage sprints with:
 
 - **Interactive Gantt timeline** — Drag tasks to reschedule, resize bars to change duration, double-click to edit task names.
 - **Workspaces & sprints** — Create workspaces, start new sprints with configurable length (1 or 2 weeks), and set timeline by start date only (end date is auto-calculated).
@@ -73,12 +73,12 @@ Copy the example env file and edit if needed:
 cp .env.example .env
 ```
 
-- **Required:** `DATABASE_URL` (default `file:./dev.db` for SQLite).
+- **Database (optional):** Set `USE_DATABASE=true` and `DATABASE_URL` (e.g. `file:./dev.db`) to use a real database. If `USE_DATABASE` is unset or not `true`, the app runs without a DB: list/detail APIs return dummy data and mutations return 503. Use the **Use demo data (works offline)** flow on the home page for a full demo from browser storage.
 - **Optional:** `OLLAMA_BASE_URL`, `OLLAMA_MODEL`, `AI_PROVIDER` for AI (see [AI (Ollama)](#ai-ollama)).
 
-### 4. Database setup
+### 4. Database setup (optional)
 
-Generate the Prisma client, create/update the database schema, and seed demo data:
+If using a database (`USE_DATABASE=true`), generate the Prisma client, create/update the schema, and seed:
 
 ```bash
 npm run db:generate

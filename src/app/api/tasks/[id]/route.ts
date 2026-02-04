@@ -5,6 +5,12 @@ export async function DELETE(
   _request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  if (!prisma) {
+    return NextResponse.json(
+      { error: "Database is disabled. Set USE_DATABASE=true to enable." },
+      { status: 503 }
+    );
+  }
   const { id } = await params;
   try {
     await prisma.task.delete({ where: { id } });
@@ -22,6 +28,12 @@ export async function PATCH(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  if (!prisma) {
+    return NextResponse.json(
+      { error: "Database is disabled. Set USE_DATABASE=true to enable." },
+      { status: 503 }
+    );
+  }
   const { id } = await params;
   try {
     const body = await request.json();

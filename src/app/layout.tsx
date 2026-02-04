@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
+import Script from "next/script";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "SimpliEd Sprint Planner",
+  title: "Sprint Planner",
   description:
     "Track, understand, and plan sprints with Gantt timelines and spillover handling.",
 };
@@ -21,6 +22,12 @@ export default function RootLayout({
           color: "var(--text)",
         }}
       >
+        <Script
+          src="https://gc.zgo.at/count.js"
+          data-goatcounter="https://ztech.goatcounter.com/count"
+          strategy="afterInteractive"
+          async
+        />
         <div className="flex min-h-screen flex-col">
           <header className="sticky top-0 z-50 border-b border-[var(--border)] bg-[var(--bg-elevated)]/95 backdrop-blur supports-[backdrop-filter]:bg-[var(--bg-elevated)]/80">
             <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-4 sm:px-6">
@@ -28,7 +35,7 @@ export default function RootLayout({
                 href="/"
                 className="text-lg font-semibold tracking-tight text-[var(--text)] transition opacity-90 hover:opacity-100"
               >
-                SimpliEd Sprint Planner
+                Sprint Planner
               </a>
               <nav className="flex items-center gap-1">
                 <a

@@ -1,4 +1,6 @@
-import { prisma } from "../src/lib/db";
+import { PrismaClient } from "@prisma/client";
+
+const prisma = new PrismaClient();
 
 async function main() {
   console.log("Cleaning existing data...");
@@ -10,7 +12,7 @@ async function main() {
   await prisma.workspace.deleteMany();
 
   const workspace = await prisma.workspace.create({
-    data: { name: "SimpliEd Sprint Planner Demo", sprintLengthDays: 14 },
+    data: { name: "Sprint Planner Demo", sprintLengthDays: 14 },
   });
 
   // 3 sprints of 2 weeks each, starting Jan 7, 2026

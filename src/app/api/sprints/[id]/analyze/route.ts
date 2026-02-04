@@ -7,6 +7,13 @@ export async function POST(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params;
+  if (!prisma) {
+    return NextResponse.json(
+      { error: "Database is disabled. Set USE_DATABASE=true to enable." },
+      { status: 503 }
+    );
+  }
+  const db = prisma;
   const provider = getAIProvider();
   if (!provider) {
     return NextResponse.json(
@@ -19,7 +26,7 @@ export async function POST(
   }
 
   try {
-    const sprint = await prisma.sprint.findUnique({
+    const sprint = await db.sprint.findUnique({
       where: { id },
       include: {
         tasks: { orderBy: { order: "asc" } },
@@ -35,7 +42,7 @@ export async function POST(
       doneStatuses.includes(t.status)
     ).length;
     const health = await import("@/lib/metrics/sprintHealth").then((m) =>
-      m.computeSprintHealth(prisma, id)
+      m.computeSprintHealth(db, id)
     );
 
     const input = {
@@ -63,7 +70,7 @@ export async function POST(
     const spilloverNotes = JSON.stringify(
       result.spilloverClassifications ?? []
     );
-    await prisma.aISprintInsight.create({
+    await db.aISprintInsight.create({
       data: {
         sprintId: id,
         summary: result.summary,

@@ -2,11 +2,18 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { ensureSpilloverRecords } from "@/lib/metrics/spillover";
 import { computeSprintHealth } from "@/lib/metrics/sprintHealth";
+import { getDummySprintById } from "@/lib/dummyData";
 
 export async function PATCH(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  if (!prisma) {
+    return NextResponse.json(
+      { error: "Database is disabled. Set USE_DATABASE=true to enable." },
+      { status: 503 }
+    );
+  }
   const { id } = await params;
   try {
     const body = await request.json();
@@ -34,6 +41,11 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params;
+  if (!prisma) {
+    const dummy = getDummySprintById(id);
+    if (dummy) return NextResponse.json(dummy);
+    return NextResponse.json({ error: "Sprint not found" }, { status: 404 });
+  }
   try {
     const sprint = await prisma.sprint.findUnique({
       where: { id },
@@ -90,9 +102,11 @@ export async function GET(
     });
   } catch (e) {
     console.error(e);
+    const dummy = getDummySprintById(id);
+    if (dummy) return NextResponse.json(dummy);
     return NextResponse.json(
-      { error: "Failed to fetch sprint" },
-      { status: 500 }
+      { error: "Sprint not found" },
+      { status: 404 }
     );
   }
 }
