@@ -10,22 +10,11 @@ export async function PATCH(
   const { id } = await params;
   try {
     const body = await request.json();
-    const { startDate, endDate, name, state } = body as {
-      startDate?: string;
-      endDate?: string;
-      name?: string;
-      state?: string;
-    };
-    const data: {
-      startDate?: Date;
-      endDate?: Date;
-      name?: string;
-      state?: string;
-    } = {};
-    if (startDate != null) data.startDate = new Date(startDate);
-    if (endDate != null) data.endDate = new Date(endDate);
+    const { name, state } = body as { name?: string; state?: string };
+    const data: { name?: string; state?: string } = {};
     if (name != null) data.name = String(name);
     if (state != null) data.state = String(state);
+    // Sprint start/end dates are immutable (no overlap); no startDate/endDate in PATCH
     const sprint = await prisma.sprint.update({
       where: { id },
       data,

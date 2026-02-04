@@ -54,6 +54,24 @@ export async function POST(request: NextRequest) {
           e.setDate(e.getDate() + lengthDays);
           return e;
         })();
+
+    const existingSprints = await prisma.sprint.findMany({
+      where: { workspaceId },
+      select: { startDate: true, endDate: true, name: true },
+    });
+    const hasOverlap = existingSprints.some(
+      (s) => start < s.endDate && end > s.startDate
+    );
+    if (hasOverlap) {
+      return NextResponse.json(
+        {
+          error:
+            "Sprint dates overlap with an existing sprint in this workspace. Choose a different start date or workspace.",
+        },
+        { status: 400 }
+      );
+    }
+
     const sprint = await prisma.sprint.create({
       data: {
         workspaceId,

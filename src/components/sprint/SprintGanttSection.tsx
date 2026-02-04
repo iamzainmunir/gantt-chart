@@ -3,7 +3,6 @@
 import { useCallback, useState } from "react";
 import { useRouter } from "next/navigation";
 import { GanttChart, type GanttTask } from "@/components/gantt/GanttChart";
-import { SprintTimelineEditor } from "./SprintTimelineEditor";
 import { TaskPanelActions } from "./TaskPanelActions";
 import { AddTaskModal } from "./AddTaskModal";
 
@@ -52,19 +51,11 @@ export function SprintGanttSection({
 
   return (
     <section className="card rounded-xl p-6 sm:p-8">
-      <div className="mb-4 flex flex-wrap items-center justify-between gap-4">
-        <div>
-          <h2 className="section-heading">Timeline</h2>
-          <p className="text-sm text-[var(--text-secondary)]">
-            Drag bars to reschedule; drag edges to change duration.
-          </p>
-        </div>
-        <SprintTimelineEditor
-          sprintId={sprintId}
-          startDate={sprintStart}
-          endDate={sprintEnd}
-          onSaved={refresh}
-        />
+      <div className="mb-4">
+        <h2 className="section-heading">Timeline</h2>
+        <p className="text-sm text-[var(--text-secondary)]">
+          Drag bars to reschedule; drag edges to change duration.
+        </p>
       </div>
       <div className="mb-3 flex flex-wrap items-center gap-x-4 gap-y-1.5 text-xs text-[var(--text-secondary)]">
         <span className="font-medium text-[var(--text-muted)]">Bar colors:</span>
