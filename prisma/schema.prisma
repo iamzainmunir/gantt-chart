@@ -1,0 +1,89 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Workspace {
+  id               String   @id @default(cuid())
+  name             String
+  sprintLengthDays Int      @default(14) // 7 or 14; used to auto-set sprint end from start
+  createdAt        DateTime @default(now())
+  sprints          Sprint[]
+}
+
+model Sprint {
+  id          String   @id @default(cuid())
+  name        String
+  state       String   @default("active")
+  startDate   DateTime
+  endDate     DateTime
+  jiraId      String?
+  workspaceId String
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  tasks       Task[]
+  spillovers  Spillover[]
+  metrics     SprintMetrics?
+  aiInsights  AISprintInsight[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model AISprintInsight {
+  id          String   @id @default(cuid())
+  sprintId    String
+  sprint      Sprint   @relation(fields: [sprintId], references: [id], onDelete: Cascade)
+  summary     String   // retrospective / root cause
+  spilloverNotes String? // JSON or text: taskId -> classification/reason
+  provider    String   @default("ollama") // ollama | openai | anthropic
+  model       String?
+  createdAt   DateTime @default(now())
+}
+
+model Task {
+  id          String    @id @default(cuid())
+  summary     String
+  estimate    Int?      // story points or hours
+  status      String    @default("To Do")
+  assignee    String?
+  order       Int       @default(0)
+  startDate   DateTime?
+  endDate     DateTime?
+  resolvedAt  DateTime?
+  blocked     Boolean   @default(false)
+  jiraKey     String?
+  links       String?   // optional URLs, one per line (tickets, screenshots, etc.)
+  sprintId    String
+  sprint      Sprint    @relation(fields: [sprintId], references: [id], onDelete: Cascade)
+  spillovers  Spillover[]
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+model SprintMetrics {
+  id                String   @id @default(cuid())
+  sprintId          String   @unique
+  sprint            Sprint   @relation(fields: [sprintId], references: [id], onDelete: Cascade)
+  velocity          Float?
+  estimateAccuracy Float?
+  blockerAgingDays  Int?
+  spilloverDays     Int?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+}
+
+model Spillover {
+  id           String   @id @default(cuid())
+  taskId       String
+  task         Task     @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  sprintId     String
+  sprint       Sprint   @relation(fields: [sprintId], references: [id], onDelete: Cascade)
+  spilloverDays Int     @default(0)
+  resolvedAt   DateTime?
+  classification String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
