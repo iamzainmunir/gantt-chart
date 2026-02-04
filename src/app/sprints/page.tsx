@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { SprintsListWithNew } from "@/components/sprint/SprintsListWithNew";
+import { SprintsListWithNew } from "../../components/sprint/SprintsListWithNew";
 
 const base = process.env.VERCEL_URL
   ? `https://${process.env.VERCEL_URL}`
